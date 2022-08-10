@@ -34,10 +34,11 @@ static double normalisation_db = 0;
  * Code
  ******************************************************************************/
 
-void dsp_init(unsigned init_fft_size)
+void dsp_init(unsigned init_fft_size, unsigned input_scale)
 {
     fft_size = init_fft_size;
-    normalisation_db = 10 * log10(INT16_MAX * fft_size);
+    normalisation_db = 20 * log10(input_scale * fft_size);
+
     fft_in = fftw_alloc_complex(fft_size);
     fft_out = fftw_alloc_complex(fft_size);
 
@@ -52,12 +53,12 @@ void dsp_free(void)
     fftw_free(fft_out);
 }
 
-void dsp_process(const complex double *samples, double *results)
+void dsp_process(const complex double *iq_inputs, double *dbm_results)
 {
     // Prepare the samples for processing by FFTW:
     for (unsigned i = 0; i < fft_size; i++)
     {
-        complex double sample = samples[i];
+        complex double sample = iq_inputs[i];
 
         // Apply any configured input gain:
         sample *= config.capture_gain;
@@ -78,23 +79,17 @@ void dsp_process(const complex double *samples, double *results)
         unsigned idx = ((fft_size / 2) + i) % fft_size;
 
         // Calculate the magnitude squared of the complex frequency bin
-        // There's no point performing an expensive  square root as it's
+        // There's no point performing an expensive square root as it's
         // just a factor of two after the upcoming log().
         double mag_sq = SQUARED(creal(fft_out[idx])) + SQUARED(cimag(fft_out[idx]));
 
         // Convert to dB and compensate for the missing square root
-        double db = (10 / 2) * log10(mag_sq);
+        double db = (20 / 2) * log10(mag_sq);
 
         // Normalize for the fft size and the scale of the original integer samples
-        double dbfs = db - normalisation_db; // 10 * log10(INT16_MAX * fft_size);
+        double db_fs = db - normalisation_db; // 20 * log10(input_scale * fft_size);
 
-        // Shift and scale the result using the configured upper and lower reference
-        // values:
-        dbfs -= config.refl;
-        dbfs /= (config.refh - config.refl);
-
-        // Clip out any negative results at this stage to simplify downstream
-        // processing:
-        results[i] = MAX(dbfs, 0);
+        // Convert to dBm using the configured offset:
+        dbm_results[i] = db_fs + config.dbm_cal;
     }
 }

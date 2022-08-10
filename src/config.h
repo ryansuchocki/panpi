@@ -23,8 +23,10 @@ typedef struct
     double capture_gain;
     double dc_alpha;
     bool x_window;
+    double dbm_cal;
     double refl;
     double refh;
+    unsigned ref_interval;
     unsigned sgam_spread;
     double sgam_drag;
     unsigned wfall_zoom;

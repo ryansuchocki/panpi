@@ -114,10 +114,10 @@ void render_debug_line(void)
     render_text(fb.buf, debug_line, -7, -10, false, YELLOW);
 }
 
-void display_update(double *amplitudes)
+void display_update(const double *dbm_values)
 {
-    spectrogram_update(amplitudes);
-    waterfall_update(amplitudes);
+    spectrogram_update(dbm_values);
+    waterfall_update(dbm_values);
 
     static int64_t next_frame_due = 0;
 

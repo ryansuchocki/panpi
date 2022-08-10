@@ -43,7 +43,10 @@ void spectrogram_render_bg(fb_buf_t *bg)
     }
 
     // Horizontal reference lines
-    for (int y = (int)(floor(config.refl + 1)); y < config.refh; y++)
+    int start = (int)(floor(config.refl / config.ref_interval + 1)) * (int)config.ref_interval;
+    int stop = (int)ceil(config.refh);
+
+    for (int y = start; y < stop; y += (int)config.ref_interval)
     {
         int yyy = (int)((y - config.refl) * SGAM_HEIGHT / (config.refh - config.refl));
         for (int x = 8 + 8 + 8 + 1; (x + 3) < SGAM_WIDTH; x += 8)
@@ -58,19 +61,19 @@ void spectrogram_render_bg(fb_buf_t *bg)
     }
 }
 
-void spectrogram_update(const double *values)
+void spectrogram_update(const double *dbm_values)
 {
     double sum = 0;
     for (unsigned i = 0; i < config.sgam_spread * 2; i++)
     {
-        sum += values[i];
+        sum += dbm_values[i];
     }
 
     for (unsigned i = config.sgam_spread; i < SGAM_WIDTH - config.sgam_spread; i++)
     {
-        sum += values[i + config.sgam_spread];
+        sum += dbm_values[i + config.sgam_spread];
         double this_amplitude = sum / (config.sgam_spread * 2 + 1);
-        sum -= values[i - config.sgam_spread];
+        sum -= dbm_values[i - config.sgam_spread];
 
         smoothed_values[i] = smoothed_values[i] * config.sgam_drag;
         smoothed_values[i] += this_amplitude * (1.0 - config.sgam_drag);
@@ -84,9 +87,9 @@ void render_spectrogram(fb_buf_t *buf)
     {
         int col = SGAM_LEFT + x;
 
-        int amp = (int)(smoothed_values[x] * SGAM_HEIGHT);
+        double dbm_display = (smoothed_values[x] - config.refl) / (config.refh - config.refl);
+        int amp = (int)(dbm_display * SGAM_HEIGHT);
 
-        // amp *= 0.244140625 * SGAM_HEIGHT;
         EQMAX(amp, 0);
         EQMIN(amp, SGAM_HEIGHT);
 

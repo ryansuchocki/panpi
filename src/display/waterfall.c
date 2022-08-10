@@ -42,7 +42,7 @@ void waterfall_init(void)
     }
 }
 
-void waterfall_update(const double *values)
+void waterfall_update(const double *dbm_values)
 {
     static unsigned phase = 0;
 
@@ -52,7 +52,8 @@ void waterfall_update(const double *values)
 
         for (unsigned x = 0; x < WFALL_WIDTH; x++)
         {
-            int intens = (int)(values[x] * INTENS_LEVELS);
+            double dbm_display = (dbm_values[x] - config.refl) / (config.refh - config.refl);
+            int intens = (int)(dbm_display * INTENS_LEVELS);
             EQMAX(intens, 0);
             waterfall[waterfall_i][x] =
                 (intens >= INTENS_LEVELS) ? WHITE : wf_map[intens];

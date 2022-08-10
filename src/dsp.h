@@ -17,6 +17,6 @@
  * API
  ******************************************************************************/
 
-extern void dsp_init(unsigned init_fft_size);
+extern void dsp_init(unsigned init_fft_size, unsigned input_scale);
 extern void dsp_free(void);
-extern void dsp_process(const complex double *samples, double *results);
+extern void dsp_process(const complex double *iq_inputs, double *dbm_results);

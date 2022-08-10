@@ -20,4 +20,4 @@
 void display_open(unsigned sample_rate);
 void display_close(void);
 void display_update_bg(unsigned sample_rate);
-void display_update(double *amplitudes);
+void display_update(const double *dbm_values);

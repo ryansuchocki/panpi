@@ -18,5 +18,5 @@
  ******************************************************************************/
 
 extern void spectrogram_render_bg(fb_buf_t *bg);
-extern void spectrogram_update(const double *values);
+extern void spectrogram_update(const double *dbm_values);
 extern void render_spectrogram(fb_buf_t *buf);

@@ -12,8 +12,8 @@ override CFLAGS += -isystem third_party -I src -std=gnu2x \
 	-Wnull-dereference -Wvector-operation-performance -Wformat-signedness \
 	-Wwrite-strings -Wlogical-op -Wjump-misses-init -Wcast-align \
 	-Wconversion -Wsign-conversion \
-	-Wdouble-promotion -Wfloat-conversion -Wfloat-equal \
-	-fanalyzer
+	-Wdouble-promotion -Wfloat-conversion -Wfloat-equal #\
+	# -fanalyzer
 
 override LDFLAGS += -lm -lasound -lfftw3
 

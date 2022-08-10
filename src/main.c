@@ -51,7 +51,7 @@ int main(int argc, const char *argv[])
 
     config_init();
     sample_rate = config.sample_rate;
-    dsp_init(FFT_SIZE);
+    dsp_init(FFT_SIZE, INT16_MAX);
 
     display_open(sample_rate);
 
@@ -61,13 +61,13 @@ int main(int argc, const char *argv[])
 
     while (should_run)
     {
-        static complex double samples[FFT_SIZE];
-        capture.get(samples, FFT_SIZE);
+        static complex double iq_samples[FFT_SIZE];
+        capture.get(iq_samples, FFT_SIZE);
 
-        static double amplitudes[FFT_SIZE];
-        dsp_process(samples, amplitudes);
+        static double dbm_values[FFT_SIZE];
+        dsp_process(iq_samples, dbm_values);
 
-        display_update(amplitudes);
+        display_update(dbm_values);
 
         if (config_update())
         {
