@@ -1,0 +1,3 @@
+[submodule "third_party/blit-fonts"]
+	path = third_party/blit-fonts
+	url = https://github.com/azmr/blit-fonts
