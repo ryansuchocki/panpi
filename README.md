@@ -35,7 +35,7 @@ The platform on which PanPI has been developed and tested is as follows: (Note t
 * [96kHz stereo USB sound card](https://www.startech.com/en-gb/cards-adapters/icusbaudio2d)
 
 ### Operating System
-* [Arch Linux ARM](https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4)
+* [Arch Linux ARM](https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4) (Using the 'ARMv7' version)
 * The following packages are needed to build and run the software. The package versions used for development are recorded here but should not be taken as requirements:
   * `git 2.37.1-1`
   * `make 4.3-3.1`
@@ -45,17 +45,9 @@ The platform on which PanPI has been developed and tested is as follows: (Note t
 
 ![photo](https://user-images.githubusercontent.com/278474/186992126-67d05c45-e872-48e6-be8e-5f827d8043ff.jpg)
 
+### Display config
 
-## Building and Running
-
-1. `$ git clone git@github.com:ryansuchocki/panpi.git`
-2. `$ cd panpi`
-3. `$ make`
-4. Customise `panpi.cfg` (see below)
-5. `$ ./panpi`
-
-### Configuration
-The following lines were added to my `/boot/config.txt` file in order to get the display working.
+The neccessary drivers for my particular TFT screen were already built-in to the kernel. The following lines were added to my `/boot/config.txt` file in order to get the display working.
 ```
 dtparam=spi=on
 
@@ -84,6 +76,14 @@ initramfs initramfs-linux.img followkernel
 # Run as fast as firmware / board allows
 arm_boost=1
 ```
+
+## Building and Running
+
+1. `$ git clone git@github.com:ryansuchocki/panpi.git`
+2. `$ cd panpi`
+3. `$ make`
+4. Customise `panpi.cfg` (see below)
+5. `$ ./panpi`
 
 ## Configuration
 
