@@ -9,23 +9,21 @@ PanPI is primarily an application which renders a realtime 'spectrogram' and 'wa
 
 PanPI is designed to perform a specific job very well, with minimal bells, whistles and other distractions.
 
-## Building and Running
-
-`$ git clone git@github.com:ryansuchocki/panpi.git`
-
-`$ cd panpi`
-
-`$ make`
-
-Customise `panpi.cfg`
-
-`$ ./panpi`
-
-## Background
+### Background
 
 I started this project after finding myself in need of a self-contained panadapter unit for my Elecraft KX3 transceiver and being told (by Elecraft's UK distributor) that the companion 'PX3 Panadapter' is no longer available. Sadly: PX3s on the second-hand market seem to be rare to non-existent.
 
 I was pleased to find that some high quality pressed steel enclosures are available to fit the Raspberry Pi along with an inexpensive TFT display. I found that running established desktop SDR software such as 'Gqrx' on a small screen is *just about* feasible however performance is severely compromised and screen space is wasted. I also found a few existing software projects intended to render a straight-forward panadapter display however the software on offer was either poorly designed, unmaintained or had unnecessary and/or obsolete dependencies.
+
+### Design
+
+PanPI is written in C and is designed to use a small fraction of the power/resources available on the Raspberry Pi 4. This leaves open the possibility of porting to a much lower power platform in the future.
+
+Although it is possible to run PanPI in a desktop window for off-target development, it is intended to run "full screen" on a dedicated display. The software design takes advantage of this fact to minimise the amount of rendering work needed.
+
+In particular: the FFT size (i.e. number of frequency bins) is chosen to be close to the horizontal width of the spectrogram/waterfall displays. This maximises the fidelity of the image while avoiding the need for a graphical "stretching" (interpolating) or curve-drawing stage. Simple integer-based routines are used to produce the curves/lines of the spectrogram graphic and fast recursive filtering is used to 'tweak' the characteristics of the display for maximum usefulness.
+
+PanPI is designed to have minimal external dependencies and make as few assumptions about the platform as possible. It does currently depend on the source data taking the form of baseband I/Q samples delivered by a 'sound card', however the software has been written with future extensions (such as an RTL-SDR source option) in mind.
 
 ## Platform
 
@@ -45,6 +43,17 @@ The platform on which PanPI has been developed and tested is as follows: (Note t
   * `fftw 3.3.10-3`
   * `libx11 1.8.1-3`
 
+![photo](https://user-images.githubusercontent.com/278474/186992126-67d05c45-e872-48e6-be8e-5f827d8043ff.jpg)
+
+
+## Building and Running
+
+1. `$ git clone git@github.com:ryansuchocki/panpi.git`
+2. `$ cd panpi`
+3. `$ make`
+4. Customise `panpi.cfg` (see below)
+5. `$ ./panpi`
+
 ### Configuration
 The following lines were added to my `/boot/config.txt` file in order to get the display working.
 ```
@@ -59,7 +68,7 @@ Note that the order of entries in `config.txt` is significant. My full `config.t
 # /boot/config.txt
 # See /boot/overlays/README for all available options
 
-dtparam=audio=on
+#dtparam=audio=on
 dtparam=spi=on
 dtparam=debug=7
 
@@ -75,17 +84,6 @@ initramfs initramfs-linux.img followkernel
 # Run as fast as firmware / board allows
 arm_boost=1
 ```
-
-![photo](https://user-images.githubusercontent.com/278474/186992126-67d05c45-e872-48e6-be8e-5f827d8043ff.jpg)
-
-## Design
-
-TODO
-
-C (fast)
-Timeless
-Minimal dependencies (maintainable)
-No platform lock-in
 
 ## Configuration
 
