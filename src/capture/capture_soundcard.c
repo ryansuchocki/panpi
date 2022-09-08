@@ -181,7 +181,7 @@ static int capture_soundcard_get(complex double *buffer, unsigned n)
     // Convert interleaved integer samples to complex float:
     for (unsigned i = 0; i < n; i++)
     {
-        complex double sample = CMPLX(interleaved[2 * i + 1], interleaved[2 * i]);
+        complex double sample = CMPLX(interleaved[2 * i], interleaved[2 * i + 1]);
         buffer[i] = sample;
     }
 

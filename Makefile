@@ -11,7 +11,7 @@ override CFLAGS += -isystem third_party -I src -std=gnu2x \
 	-Wundef -Wunused-macros -Wshadow -Winline -Wpointer-arith -Winit-self \
 	-Wnull-dereference -Wvector-operation-performance -Wformat-signedness \
 	-Wwrite-strings -Wlogical-op -Wjump-misses-init -Wcast-align \
-	-Wconversion -Wsign-conversion -Warith-conversion \
+	-Wconversion -Wsign-conversion \
 	-Wdouble-promotion -Wfloat-conversion -Wfloat-equal \
 	-fanalyzer
 
@@ -20,7 +20,7 @@ override LDFLAGS += -lm -lasound -lfftw3
 SOURCES := $(wildcard src/*.c src/*/*.c)
 
 ifdef DEBUG
-	override CFLAGS += -g -Og -pg
+	override CFLAGS += -g -Og -pg -Wno-inline
 else
 	override CFLAGS += -O3 -march=native -ffast-math -flto
 endif

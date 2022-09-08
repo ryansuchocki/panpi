@@ -20,7 +20,7 @@
 static int capture_file_open(unsigned sample_rate);
 static int capture_file_close(void);
 static int capture_file_get(complex double *buffer, unsigned n);
-static inline char getc_wrapped(FILE *fp);
+static inline uint8_t getc_wrapped(FILE *fp);
 
 /*******************************************************************************
  * Variables
@@ -69,13 +69,13 @@ static int capture_file_get(complex double *buffer, unsigned n)
 {
     // Simulate blocking until the requested number of samples could
     // have been received at the configured sample rate:
-    capture_time += (NANOSECONDS_PER_SECOND * n / capture_rate);
-    int64_t block = capture_time - (int64_t)get_nanos();
+    capture_time += (NANOSECONDS_PER_SECOND * (int64_t)n / capture_rate);
+    int64_t block = capture_time - get_nanos();
     if (block > 0)
     {
         nanosleep(&((struct timespec){
-            .tv_sec = block / NANOSECONDS_PER_SECOND,
-            .tv_nsec = block % NANOSECONDS_PER_SECOND
+            .tv_sec = (time_t)(block / NANOSECONDS_PER_SECOND),
+            .tv_nsec = (long)(block % NANOSECONDS_PER_SECOND)
         }), NULL);
     }
 
@@ -83,10 +83,11 @@ static int capture_file_get(complex double *buffer, unsigned n)
     {
         int16_t i, q;
 
-        ((char *)&q)[0] = getc_wrapped(capture_fp);
-        ((char *)&q)[1] = getc_wrapped(capture_fp);
-        ((char *)&i)[0] = getc_wrapped(capture_fp);
-        ((char *)&i)[1] = getc_wrapped(capture_fp);
+        // Assume file is 16-bit LE, IQ
+        i = getc_wrapped(capture_fp);
+        i |= getc_wrapped(capture_fp) << 8;
+        q = getc_wrapped(capture_fp);
+        q |= getc_wrapped(capture_fp) << 8;
 
         *buffer++ = CMPLX(i, q);
     }
@@ -94,7 +95,7 @@ static int capture_file_get(complex double *buffer, unsigned n)
     return 0;
 }
 
-static inline char getc_wrapped(FILE *fp)
+static inline uint8_t getc_wrapped(FILE *fp)
 {
     int c = getc(fp);
 
@@ -110,5 +111,5 @@ static inline char getc_wrapped(FILE *fp)
         }
     }
 
-    return (char)c;
+    return (uint8_t)c;
 }

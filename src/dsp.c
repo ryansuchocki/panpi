@@ -73,7 +73,7 @@ void dsp_process(const complex double *samples, double *results)
     for (unsigned i = 0; i < fft_size; i++)
     {
         // Use an offset index so that 0Hz is shifted to the centre of the array:
-        unsigned idx = (i + fft_size / 2) % fft_size;
+        unsigned idx = ((fft_size / 2) + i) % fft_size;
 
         // Calculate the magnitude squared of the complex frequency bin
         // There's no point performing an expensive  square root as it's
