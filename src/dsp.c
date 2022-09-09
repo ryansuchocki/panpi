@@ -28,6 +28,7 @@ static fftw_plan fft_plan;
 
 static complex double dc = 0;
 static unsigned fft_size = 0;
+static double normalisation_db = 0;
 
 /*******************************************************************************
  * Code
@@ -36,6 +37,7 @@ static unsigned fft_size = 0;
 void dsp_init(unsigned init_fft_size)
 {
     fft_size = init_fft_size;
+    normalisation_db = 10 * log10(INT16_MAX * fft_size);
     fft_in = fftw_alloc_complex(fft_size);
     fft_out = fftw_alloc_complex(fft_size);
 
@@ -80,17 +82,19 @@ void dsp_process(const complex double *samples, double *results)
         // just a factor of two after the upcoming log().
         double mag_sq = SQUARED(creal(fft_out[idx])) + SQUARED(cimag(fft_out[idx]));
 
-        // Calculate the logarithm of the magnitude. The log base doesn't
-        // matter as it changes the result by a constant factor.
-        double log_mag = log(mag_sq);
+        // Convert to dB and compensate for the missing square root
+        double db = (10 / 2) * log10(mag_sq);
+
+        // Normalize for the fft size and the scale of the original integer samples
+        double dbfs = db - normalisation_db; // 10 * log10(INT16_MAX * fft_size);
 
         // Shift and scale the result using the configured upper and lower reference
         // values:
-        log_mag -= config.refl;
-        log_mag /= (config.refh - config.refl);
+        dbfs -= config.refl;
+        dbfs /= (config.refh - config.refl);
 
         // Clip out any negative results at this stage to simplify downstream
         // processing:
-        results[i] = MAX(log_mag, 0);
+        results[i] = MAX(dbfs, 0);
     }
 }
