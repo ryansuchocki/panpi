@@ -47,7 +47,17 @@ The platform on which PanPI has been developed and tested is as follows: (Note t
 
 ### Display config
 
-The neccessary drivers for my particular TFT screen were already built-in to the kernel. The following lines were added to my `/boot/config.txt` file in order to get the display working.
+The core drivers for my particular TFT screen were already built-in to the kernel, but a "device tree overlay" file is needed to tell Linux how it is connected.
+
+The documentation for the display directed me to the [LCD-Show repository](https://github.com/goodtft/LCD-show). The top-level 'install' scripts provided in that repository are very fragile, dependent on one particular operating system and assume that the user wants to install a full desktop manager along with the display driver. Fortunately, after a little digging, the necessary 'device tree overlay' file can be extracted easily.
+
+I ran the following commands on the Pi in order to download the file and copy it into place:
+
+1. `$ curl -O 'https://github.com/goodtft/LCD-show/raw/master/usr/tft35a-overlay.dtb`
+2. `$ sudo mv tft35a-overlay.dtb /boot/overlays/`
+
+The following lines were added to my `/boot/config.txt` file:
+
 ```
 dtparam=spi=on
 
@@ -76,6 +86,10 @@ initramfs initramfs-linux.img followkernel
 # Run as fast as firmware / board allows
 arm_boost=1
 ```
+
+After rebooting, I was able to verify that the display driver was loaded by displaying random data to the screen using:
+
+`$ sudo cat /dev/urandom > /dev/fb0`
 
 ## Building and Running
 
