@@ -175,6 +175,11 @@ static int capture_soundcard_get(complex double *buffer, unsigned n)
     if ((err = (int)snd_pcm_readi(capture_handle, interleaved, n)) != (int)n)
     {
         eprintf("Snd_pcm_readi(): %i (%s)\n", err, snd_strerror(err));
+
+        if (err == -19)
+        {
+            exit(-19);
+        }
         return 1;
     }
 
