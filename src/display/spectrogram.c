@@ -64,19 +64,29 @@ void spectrogram_render_bg(fb_buf_t *bg)
 void spectrogram_update(const double *dbm_values)
 {
     double sum = 0;
-    for (unsigned i = 0; i < config.sgam_spread * 2; i++)
+    unsigned denom = config.sgam_spread;
+
+    for (unsigned i = 0; i < config.sgam_spread; i++)
     {
         sum += dbm_values[i];
     }
 
-    for (unsigned i = config.sgam_spread; i < SGAM_WIDTH - config.sgam_spread; i++)
+    for (unsigned i = 0; i < SGAM_WIDTH; i++)
     {
-        sum += dbm_values[i + config.sgam_spread];
-        double this_amplitude = sum / (config.sgam_spread * 2 + 1);
-        sum -= dbm_values[i - config.sgam_spread];
+        if (i < SGAM_WIDTH - config.sgam_spread)
+            sum += dbm_values[i + config.sgam_spread];
+        else
+            denom--;
 
-        smoothed_values[i] = smoothed_values[i] * config.sgam_drag;
-        smoothed_values[i] += this_amplitude * (1.0 - config.sgam_drag);
+        if (i > config.sgam_spread)
+            sum -= dbm_values[i - config.sgam_spread - 1];
+        else
+            denom++;
+
+        double this_amplitude = sum / denom;
+
+        // IIR/EWMA
+        smoothed_values[i] += (1 - config.sgam_drag) * (this_amplitude - smoothed_values[i]);
     }
 }
 
