@@ -53,7 +53,7 @@ The documentation for the display directed me to the [LCD-Show repository](https
 
 I ran the following commands on the Pi in order to download the file and copy it into place:
 
-1. `$ curl -O 'https://github.com/goodtft/LCD-show/raw/master/usr/tft35a-overlay.dtb`
+1. `$ curl -O "https://github.com/goodtft/LCD-show/raw/master/usr/tft35a-overlay.dtb"`
 2. `$ sudo mv tft35a-overlay.dtb /boot/overlays/`
 
 The following lines were added to my `/boot/config.txt` file:
