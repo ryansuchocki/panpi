@@ -42,6 +42,7 @@ The platform on which PanPI has been developed and tested is as follows: (Note t
   * `gcc 12.1.0-2.1`
   * `fftw 3.3.10-3`
   * `libx11 1.8.1-3`
+  * `alsa-lib 1.2.8-1`
 
 ![photo](https://user-images.githubusercontent.com/278474/186992126-67d05c45-e872-48e6-be8e-5f827d8043ff.jpg)
 
@@ -93,7 +94,7 @@ After rebooting, I was able to verify that the display driver was loaded by disp
 
 ## Building and Running
 
-1. `$ git clone git@github.com:ryansuchocki/panpi.git`
+1. `$ git clone git@github.com:ryansuchocki/panpi.git --recurse-submodules`
 2. `$ cd panpi`
 3. `$ make`
 4. Customise `panpi.cfg` (see below)
