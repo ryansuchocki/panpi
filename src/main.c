@@ -15,8 +15,6 @@
  * Definitions
  ******************************************************************************/
 
-#define FFT_SIZE SGAM_WIDTH // NB small prime factors
-
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -51,9 +49,14 @@ int main(int argc, const char *argv[])
 
     config_init();
     sample_rate = config.sample_rate;
-    dsp_init(FFT_SIZE, INT16_MAX);
 
-    display_open(sample_rate);
+    unsigned sgam_width = display_open(sample_rate);
+    unsigned fft_size = sgam_width;
+
+    complex double *iq_samples = malloc(sizeof(complex double) * fft_size);
+    double *dbm_values = malloc(sizeof(double) * fft_size);
+
+    dsp_init(fft_size, INT16_MAX);
 
     capture_t capture = capture_init(config.source);
 
@@ -61,17 +64,15 @@ int main(int argc, const char *argv[])
 
     while (should_run)
     {
-        static complex double iq_samples[FFT_SIZE];
-        capture.get(iq_samples, FFT_SIZE);
+        capture.get(iq_samples, fft_size);
 
-        static double dbm_values[FFT_SIZE];
         dsp_process(iq_samples, dbm_values);
 
         display_update(dbm_values);
 
         if (config_update())
         {
-            display_update_bg(sample_rate);
+            display_configure(sample_rate);
             printf("BG\n");
         }
     }
@@ -80,6 +81,9 @@ int main(int argc, const char *argv[])
 
     capture.close();
     display_close();
+
+    free(iq_samples);
+    free(dbm_values);
 
     dsp_free();
 

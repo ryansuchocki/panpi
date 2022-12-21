@@ -24,40 +24,52 @@
  * Variables
  ******************************************************************************/
 
-static double smoothed_values[SGAM_WIDTH];
+static unsigned sgam_width;
+static unsigned sgam_height;
+static unsigned sgam_left;
+static unsigned sgam_top;
+static double *smoothed_values;
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-void spectrogram_render_bg(fb_buf_t *bg)
+void spectrogram_init(unsigned width, unsigned height, unsigned left, unsigned top)
 {
-    // Vertical centre line
-    for (int x = 0; x < SGAM_WIDTH; x++)
+    sgam_width = width;
+    sgam_height = height;
+    sgam_left = left;
+    sgam_top = top;
+    smoothed_values = (double *)malloc(sizeof(double) * width);
+}
+
+void spectrogram_render_bg(fb_buf_t *fb)
+{
+    // Background & Vertical centre line
+    for (unsigned x = 0; x < sgam_width; x++)
     {
-        for (int y = 0; y < SGAM_HEIGHT; y++)
+        for (unsigned y = 0; y < sgam_height; y++)
         {
-            bg->xy[SGAM_TOP + SGAM_HEIGHT - 1 - y][SGAM_LEFT + x] =
-                (x == SGAM_WIDTH / 2) ? CLINECOL : BGCOL;
+            *xy(fb, sgam_top + sgam_height - 1 - y, sgam_left + x) =
+                (x == sgam_width / 2) ? CLINECOL : BGCOL;
         }
     }
 
     // Horizontal reference lines
-    int start = (int)(floor(config.refl / config.ref_interval + 1)) * (int)config.ref_interval;
-    int stop = (int)ceil(config.refh);
+    int first_db_val = (int)(floor(config.refl / config.ref_interval + 1)) * (int)config.ref_interval;
+    int last_db_val = (int)ceil(config.refh);
 
-    for (int y = start; y < stop; y += (int)config.ref_interval)
+    for (int db_val = first_db_val; db_val < last_db_val; db_val += (int)config.ref_interval)
     {
-        int yyy = (int)((y - config.refl) * SGAM_HEIGHT / (config.refh - config.refl));
-        for (int x = 8 + 8 + 8 + 1; (x + 3) < SGAM_WIDTH; x += 8)
-            for (int xx = x; xx < x + 3; xx++)
-                bg->xy[SGAM_TOP + SGAM_HEIGHT - 1 - yyy][SGAM_LEFT + xx] =
-                    HLINECOL;
+        unsigned y = (unsigned)((db_val - config.refl) * sgam_height / (config.refh - config.refl));
+        for (unsigned x = 8 + 8 + 8 + 1; (x + 3) < sgam_width; x += 8)
+            for (unsigned xx = x; xx < x + 3; xx++)
+                *xy(fb, (sgam_top + sgam_height - 1) - y, sgam_left + xx) = HLINECOL;
 
-        char buf[5];
-        snprintf(buf, 5, "%i", y);
+        char buf[13];
+        snprintf(buf, 13, "%i", db_val);
 
-        render_text(bg, buf, SGAM_LEFT + 6, SGAM_TOP + SGAM_HEIGHT - 1 - yyy, true, YELLOW);
+        render_text(fb, buf, (int)sgam_left + 6, (int)(sgam_top + sgam_height - 1 - y), true, YELLOW);
     }
 }
 
@@ -71,9 +83,9 @@ void spectrogram_update(const double *dbm_values)
         sum += dbm_values[i];
     }
 
-    for (unsigned i = 0; i < SGAM_WIDTH; i++)
+    for (unsigned i = 0; i < sgam_width; i++)
     {
-        if (i < SGAM_WIDTH - config.sgam_spread)
+        if (i < sgam_width - config.sgam_spread)
             sum += dbm_values[i + config.sgam_spread];
         else
             denom--;
@@ -93,23 +105,23 @@ void spectrogram_update(const double *dbm_values)
 void render_spectrogram(fb_buf_t *buf)
 {
     int lastamp = 0;
-    for (int x = 0; x < SGAM_WIDTH; x++)
+    for (unsigned x = 0; x < sgam_width; x++)
     {
-        int col = SGAM_LEFT + x;
+        unsigned col = sgam_left + x;
 
         double dbm_display = (smoothed_values[x] - config.refl) / (config.refh - config.refl);
-        int amp = (int)(dbm_display * SGAM_HEIGHT);
+        int amp = (int)(dbm_display * sgam_height);
 
         EQMAX(amp, 0);
-        EQMIN(amp, SGAM_HEIGHT);
+        EQMIN(amp, (int)sgam_height);
 
         int start = MIN(amp, lastamp);
         int stop = MAX(amp, lastamp);
         lastamp = amp;
 
-        for (int y = start; y <= stop; y++)
+        for (unsigned y = (unsigned)start; y <= (unsigned)stop; y++)
         {
-            buf->xy[SGAM_TOP + SGAM_HEIGHT - y - 1][col] = YELLOW;
+            *xy(buf, sgam_top + sgam_height - y - 1, col) = YELLOW;
         }
     }
 }

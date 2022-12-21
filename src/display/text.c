@@ -31,20 +31,20 @@
 void render_text(fb_buf_t *buf, const char *text, int x, int y, bool v_centre, colour16_t colour)
 {
     if (x < 0)
-        x += FB_WIDTH - (blit32_ADVANCE * (int)strlen(text));
+        x += (int)buf->size_x - (blit32_ADVANCE * (int)strlen(text));
 
     if (y < 0)
-        y += FB_HEIGHT - blit32_HEIGHT;
+        y += (int)buf->size_y - blit32_HEIGHT;
 
     if (v_centre)
         y -= blit32_HEIGHT / 2;
 
     blit32_TextExplicit(
-        (blit_pixel *)buf,
+        (blit_pixel *)buf->buf,
         colour,
         1,
-        FB_WIDTH,
-        FB_HEIGHT,
+        (int)buf->size_x,
+        (int)buf->size_y,
         blit_Clip,
         x,
         y,

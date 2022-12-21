@@ -33,10 +33,11 @@ static Window window;
 static Atom wm_delete_window;
 static XImage *img;
 
-static fb_buf_t x_backbuf;
+#define FB_WIDTH 800
+#define FB_HEIGHT 500
 
 fb_t fb_x = {
-    .buf = &x_backbuf,
+    .buf = NULL,
     .open = &fb_x_open,
     .close = &fb_x_close,
     .draw = &fb_x_draw,
@@ -48,6 +49,8 @@ fb_t fb_x = {
 
 static void fb_x_open(void)
 {
+    fb_x.buf = fb_buf_create(FB_WIDTH, FB_HEIGHT);
+
     display = XOpenDisplay(NULL);
     if (!display)
         exit(1);
@@ -98,9 +101,9 @@ static void fb_x_close(void)
 
 static void fb_x_draw(void)
 {
-    for (int y = 0; y < FB_HEIGHT; y++)
-        for (int x = 0; x < FB_WIDTH; x++)
-            XPutPixel(img, x, y, colour16_to_24(x_backbuf.xy[y][x]));
+    for (unsigned y = 0; y < FB_HEIGHT; y++)
+        for (unsigned x = 0; x < FB_WIDTH; x++)
+            XPutPixel(img, (int)x, (int)y, colour16_to_24(*xy(fb_x.buf, y, x)));
 
     XPutImage(display, window, DefaultGC(display, DefaultScreen(display)), img, 0, 0, 0, 0, FB_WIDTH, FB_HEIGHT);
 

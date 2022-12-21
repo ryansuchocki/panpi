@@ -31,10 +31,12 @@ static inline uint32_t colour16_to_24(colour16_t c)
         ((c & 0x1F) << 3));
 }
 
-typedef union
+typedef struct
 {
-    colour16_t xy[FB_HEIGHT][FB_WIDTH];
-    colour16_t flat[FB_HEIGHT * FB_WIDTH];
+    unsigned size_x;
+    unsigned size_y;
+    size_t buf_size;
+    colour16_t buf[];
 } fb_buf_t;
 
 typedef struct
@@ -49,13 +51,13 @@ typedef struct
  * API
  ******************************************************************************/
 
-static inline fb_t fb_init(bool use_x11)
+static inline fb_t *fb_init(bool use_x11)
 {
     if (use_x11)
     {
 #if COMPILE_X11
         extern fb_t fb_x;
-        return fb_x;
+        return &fb_x;
 #else
         eprintf("PanPI was compiled without X11 support\n");
         exit(1);
@@ -64,6 +66,23 @@ static inline fb_t fb_init(bool use_x11)
     else
     {
         extern fb_t fb_raw;
-        return fb_raw;
+        return &fb_raw;
     }
+}
+
+static inline fb_buf_t *fb_buf_create(unsigned size_x, unsigned size_y)
+{
+    size_t buf_size = sizeof(colour16_t) * size_x * size_y;
+    fb_buf_t *buf = (fb_buf_t *)malloc(sizeof(fb_buf_t) + buf_size);
+    buf->buf_size = buf_size;
+    buf->size_x = size_x;
+    buf->size_y = size_y;
+
+    return buf;
+}
+
+static inline colour16_t *xy(fb_buf_t *buf, unsigned y, unsigned x)
+{
+    // TODO assert?
+    return &buf->buf[(size_t)y * buf->size_x + (size_t)x];
 }

@@ -8,6 +8,8 @@
 #include "framebuffer.h"
 #include "layout.h"
 
+#include <sys/ioctl.h>
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -27,11 +29,10 @@ static void fb_raw_draw(void);
  ******************************************************************************/
 
 static int fbfd = FD_OPEN_FAILED;
-static fb_buf_t *frontbuf = NULL;
-static fb_buf_t raw_backbuf;
+static colour16_t *frontbuf = NULL;
 
 fb_t fb_raw = {
-    .buf = &raw_backbuf,
+    .buf = NULL,
     .open = &fb_raw_open,
     .close = &fb_raw_close,
     .draw = &fb_raw_draw,
@@ -40,6 +41,8 @@ fb_t fb_raw = {
 /*******************************************************************************
  * Code
  ******************************************************************************/
+
+#include <linux/fb.h>
 
 static void fb_raw_open(void)
 {
@@ -50,7 +53,25 @@ static void fb_raw_open(void)
         exit(1);
     }
 
-    frontbuf = mmap(0, sizeof(fb_buf_t), PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+    struct fb_var_screeninfo vinfo;
+    if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo) != 0)
+    {
+        eprintf("Failed to determine framebuffer dimensions (IOCTL)\n");
+        exit(1);
+    }
+
+    printf("Framebuffer dimensions: x=%u y=%u\n", vinfo.xres, vinfo.yres);
+
+    if (vinfo.xres == 0 || vinfo.yres == 0)
+    {
+        eprintf("Failed to determine framebuffer dimensions (zero size)\n");
+        exit(1);
+    }
+    // TODO verify colour format?
+
+    fb_raw.buf = fb_buf_create(vinfo.xres, vinfo.yres);
+
+    frontbuf = mmap(0, fb_raw.buf->buf_size, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
     if (frontbuf == MAP_FAILED)
     {
         eprintf("Failed to map framebuffer device to memory\n");
@@ -60,11 +81,12 @@ static void fb_raw_open(void)
 
 static void fb_raw_close(void)
 {
-    munmap(frontbuf, sizeof(fb_buf_t));
+    munmap(frontbuf, fb_raw.buf->buf_size);
     close(fbfd);
+    free(fb_raw.buf);
 }
 
 static void fb_raw_draw(void)
 {
-    memcpy(frontbuf, &raw_backbuf, sizeof(*frontbuf));
+    memcpy(frontbuf, fb_raw.buf->buf, fb_raw.buf->buf_size);
 }

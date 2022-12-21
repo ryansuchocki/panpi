@@ -29,8 +29,11 @@ static void render_debug_line(void);
  * Variables
  ******************************************************************************/
 
-static fb_t fb;
-static fb_buf_t bg;
+static fb_t *fb;
+static fb_buf_t *bg;
+
+static unsigned sgam_height;
+static unsigned sgam_top;
 
 static unsigned sample_rate;
 
@@ -38,64 +41,88 @@ static unsigned sample_rate;
  * Code
  ******************************************************************************/
 
-void display_open(unsigned open_sample_rate)
+unsigned display_open(unsigned open_sample_rate)
 {
     fb = fb_init(config.x_window);
 
-    waterfall_init();
+    fb->open();
 
-    fb.open();
-    display_update_bg(open_sample_rate);
-    fb.draw();
+    bg = (fb_buf_t *)malloc(sizeof(fb_buf_t) + fb->buf->buf_size);
+
+    bg->size_x = fb->buf->size_x;
+    bg->size_y = fb->buf->size_y;
+    bg->buf_size = fb->buf->buf_size;
+
+    unsigned sgam_width = (fb->buf->size_x - MARGIN * 2 - FRAMETHICKNESS * 2);
+    sgam_height = (fb->buf->size_y - MARGIN * 2 - FRAMETHICKNESS * 2) / 2;
+    unsigned sgam_left = MARGIN + FRAMETHICKNESS;
+    sgam_top = MARGIN + FRAMETHICKNESS;
+
+    unsigned wfall_top = sgam_top + ((fb->buf->size_y - MARGIN * 2 - FRAMETHICKNESS * 2) / 2) + FRAMETHICKNESS;
+    unsigned wfall_height = fb->buf->size_y - wfall_top - MARGIN - FRAMETHICKNESS;
+
+    spectrogram_init(sgam_width, sgam_height, sgam_left, sgam_top);
+    waterfall_init(sgam_width, wfall_height, sgam_left, wfall_top);
+
+    display_configure(open_sample_rate);
+    fb->draw();
+
+    return sgam_width;
 }
 
 void display_close(void)
 {
-    fb.close();
+    fb->close();
 }
 
-void display_update_bg(unsigned update_sample_rate)
+void display_configure(unsigned configure_sample_rate)
 {
-    sample_rate = update_sample_rate;
+    sample_rate = configure_sample_rate;
 
-    spectrogram_render_bg(&bg);
+    // Background
+    for (unsigned x = 0; x < fb->buf->size_x; x++)
+        for (unsigned y = 0; y < fb->buf->size_y; y++)
+            *xy(bg, y, x) = BGCOL;
+
+    // Pane background(s)
+    spectrogram_render_bg(bg);
 
     // Horizontal lines
-    for (int x = 3; x < FB_WIDTH - 3; x++)
-        for (int y = 0; y < 3; y++)
+    for (unsigned x = MARGIN; x < fb->buf->size_x - MARGIN; x++)
+        for (unsigned y = 0; y < FRAMETHICKNESS; y++)
         {
             // Head
-            bg.xy[3 + y][x] = WHITE;
+            *xy(bg, MARGIN + y,x) = WHITE;
             // Mid
-            bg.xy[SGAM_TOP + SGAM_HEIGHT + y][x] = WHITE;
+            *xy(bg, sgam_top + sgam_height + y, x) = WHITE;
             // Foot
-            bg.xy[FB_HEIGHT - 4 - y][x] = WHITE;
+            *xy(bg, fb->buf->size_y - 4 - y, x) = WHITE;
         }
 
     // Vertical lines
-    for (int y = 3; y < FB_HEIGHT - 4; y++)
-        for (int x = 0; x < 3; x++)
+    for (unsigned y = MARGIN; y < fb->buf->size_y - 4; y++)
+        for (unsigned x = 0; x < FRAMETHICKNESS; x++)
         {
             // Left
-            bg.xy[y][3 + x] = WHITE;
+            *xy(bg, y, MARGIN + x) = WHITE;
             // Right
-            bg.xy[y][FB_WIDTH - 4 - x] = WHITE;
+            *xy(bg, y, fb->buf->size_x - 4 - x) = WHITE;
         }
 
     // Head & foot bottom frequency pips
-    for (int x = 0; x < FB_WIDTH / 2;
-         x += (PIP_INTERVAL_HZ * FB_WIDTH / (int)sample_rate))
-        for (int xx = x - 1; xx < x + 2; xx++)
-            for (int y = 0; y < 3; y++)
+    for (unsigned x = 0; x < fb->buf->size_x / 2;
+         x += (PIP_INTERVAL_HZ * fb->buf->size_x / sample_rate))
+        for (unsigned xx = x; xx <= x + 1; xx++)
+            for (unsigned y = 0; y < MARGIN; y++)
             {
                 // Head left
-                bg.xy[y][FB_WIDTH / 2 - xx] = WHITE;
+                *xy(bg, y, fb->buf->size_x / 2 - xx) = WHITE;
                 // Head right
-                bg.xy[y][FB_WIDTH / 2 + xx] = WHITE;
+                *xy(bg, y, fb->buf->size_x / 2 + xx) = WHITE;
                 // Foot left
-                bg.xy[FB_HEIGHT - y - 1][FB_WIDTH / 2 - xx] = WHITE;
+                *xy(bg, fb->buf->size_y - y - 1, fb->buf->size_x / 2 - xx) = WHITE;
                 // Foot right
-                bg.xy[FB_HEIGHT - y - 1][FB_WIDTH / 2 + xx] = WHITE;
+                *xy(bg, fb->buf->size_y - y - 1, fb->buf->size_x / 2 + xx) = WHITE;
             }
 }
 
@@ -115,7 +142,7 @@ void render_debug_line(void)
         t_last = t_now;
     }
 
-    render_text(fb.buf, debug_line, -7, -10, false, YELLOW);
+    render_text(fb->buf, debug_line, -7, -10, false, YELLOW);
 }
 
 void display_update(const double *dbm_values)
@@ -132,12 +159,12 @@ void display_update(const double *dbm_values)
         next_frame_due = next_frame_due ? next_frame_due : nanos;
         next_frame_due += NANOSECONDS_PER_SECOND / TARGET_FPS;
 
-        memcpy(fb.buf, &bg, sizeof(*fb.buf));
+        memcpy(fb->buf->buf, bg->buf, fb->buf->buf_size);
 
-        render_spectrogram(fb.buf);
-        render_waterfall(fb.buf);
+        render_spectrogram(fb->buf);
+        render_waterfall(fb->buf);
         render_debug_line();
 
-        fb.draw();
+        fb->draw();
     }
 }
