@@ -32,18 +32,20 @@ static void render_debug_line(void);
 static fb_t fb;
 static fb_buf_t bg;
 
+static unsigned sample_rate;
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-void display_open(unsigned sample_rate)
+void display_open(unsigned open_sample_rate)
 {
     fb = fb_init(config.x_window);
 
     waterfall_init();
 
     fb.open();
-    display_update_bg(sample_rate);
+    display_update_bg(open_sample_rate);
     fb.draw();
 }
 
@@ -52,8 +54,10 @@ void display_close(void)
     fb.close();
 }
 
-void display_update_bg(unsigned sample_rate)
+void display_update_bg(unsigned update_sample_rate)
 {
+    sample_rate = update_sample_rate;
+
     spectrogram_render_bg(&bg);
 
     // Horizontal lines
@@ -99,14 +103,14 @@ void render_debug_line(void)
 {
     static time_t t_last = 0;
     static int count = 0;
-    static char debug_line[20];
+    static char debug_line[100];
 
     count++;
     time_t t_now = time(NULL);
 
     if (t_now > t_last)
     {
-        snprintf(debug_line, 20, "%ifps", count);
+        snprintf(debug_line, 100, "%ifps %ukHz", count, sample_rate / 1000);
         count = 0;
         t_last = t_now;
     }
