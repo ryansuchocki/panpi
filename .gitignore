@@ -4,6 +4,7 @@ panpi_sim
 .vscode
 gmon.out
 prof_output
+panpi.cfg
 
 *.d
 *.o

@@ -2,6 +2,7 @@
 
 # Source type selection. Should be 'soundcard' or 'file'
 source: soundcard
+# source: file
 
 # Device selection (only applies if the source type is 'soundcard')
 # May be an ALSA identifier string (such as 'hw:1,0' or 'default)
@@ -10,14 +11,14 @@ source: soundcard
 # device: auto
 
 # Source file path (only applies if the source type is 'file')
-file: test/1min.dat
+file: /dev/urandom
 
 # Capture sample rate
 sample_rate: 96000
 
 # Set to 'true' to render to an X11 window rather than direct
 # to the framebuffer
-# x_window: true
+x_window: true
 
 # Capture gain level
 capture_gain: 1.0
@@ -27,8 +28,8 @@ dc_alpha: 0.999
 
 # Upper and lower reference levels for the spectrogram and
 # waterfall display. Use this to "zoom in/out" vertically.
-refl: 8.0
-refh: 18.0
+refh: -20
+refl: -120
 
 # Smoothing factors for the spectrogram display
 sgam_spread: 1

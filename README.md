@@ -97,8 +97,9 @@ After rebooting, I was able to verify that the display driver was loaded by disp
 1. `$ git clone git@github.com:ryansuchocki/panpi.git --recurse-submodules`
 2. `$ cd panpi`
 3. `$ make`
-4. Customise `panpi.cfg` (see below)
-5. `$ ./panpi`
+4. `$ cp panpi.cfg.template panpi.cfg`
+5. Customise `panpi.cfg` (see below)
+6. `$ ./panpi`
 
 ## Configuration
 
