@@ -120,6 +120,7 @@ See comments within the file itself for details of the available configuration i
   - [x] Rendering to a cheap TFT screen using fbdev
 - Goals for 'V1'
   - [x] Rendering to a desktop window (using X11) for off-target development
+  - [x] Handling different screen sizes
   - [ ] Runtime controls
   - [ ] Zoom/span controls
   - [ ] Useful documentation
