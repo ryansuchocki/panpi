@@ -19,6 +19,7 @@ typedef struct
     char source[CONFIG_STR_LEN];
     char device[CONFIG_STR_LEN];
     char file[CONFIG_STR_LEN];
+    char fb_dev[CONFIG_STR_LEN];
     unsigned sample_rate;
     double capture_gain;
     double dc_alpha;

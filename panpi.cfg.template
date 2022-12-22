@@ -20,6 +20,10 @@ sample_rate: 96000
 # to the framebuffer
 x_window: true
 
+# Target framebuffer device (ignored if x_window is true).
+# You may need to change this if you have multiple displays
+fb_dev: /dev/fb0
+
 # Capture gain level
 capture_gain: 1.0
 

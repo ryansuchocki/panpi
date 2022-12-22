@@ -46,7 +46,7 @@ fb_t fb_raw = {
 
 static void fb_raw_open(void)
 {
-    fbfd = open("/dev/fb0", O_RDWR);
+    fbfd = open(config.fb_dev, O_RDWR);
     if (fbfd == FD_OPEN_FAILED)
     {
         eprintf("Cannot open framebuffer device\n");
