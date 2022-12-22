@@ -30,6 +30,12 @@ capture_gain: 1.0
 # Sharpness parameter for the DSP "DC offset" removal filter
 dc_alpha: 0.999
 
+# dBm value equivalent to 0dB "full scale". This will vary depending
+# on the radio and/or soundcard hardware. It is only necessary to
+# calibrate this value if you want the numbers shown on screen to
+# match the absolute signal strength.
+dbm_cal: 0
+
 # Upper and lower reference levels for the spectrogram and
 # waterfall display. Use this to "zoom in/out" vertically.
 refh: -20
