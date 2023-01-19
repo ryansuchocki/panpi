@@ -54,39 +54,20 @@ The documentation for the display directed me to the [LCD-Show repository](https
 
 I ran the following commands on the Pi in order to download the file and copy it into place:
 
-1. `$ curl -O "https://github.com/goodtft/LCD-show/raw/master/usr/tft35a-overlay.dtb"`
-2. `$ sudo mv tft35a-overlay.dtb /boot/overlays/`
+1. `$ curl -LO "https://github.com/goodtft/LCD-show/raw/master/usr/tft35a-overlay.dtb"`
+2. `$ sudo cp tft35a-overlay.dtb /boot/overlays/tft35a.dtbo`
 
 The following lines were added to my `/boot/config.txt` file:
-
+ 
 ```
 dtparam=spi=on
 
 dtoverlay=tft35a:rotate=270,speed=160000000,fps=60
 ```
 
-Note that the order of entries in `config.txt` is significant. My full `config.txt`, at time of writing, is as follows:
+I gave the `alarm` user permission to access the 'framebuffer' device by running:
 
-```
-# /boot/config.txt
-# See /boot/overlays/README for all available options
-
-#dtparam=audio=on
-dtparam=spi=on
-dtparam=debug=7
-
-dtoverlay=vc4-kms-v3d
-dtoverlay=tft35a:rotate=270,speed=160000000,fps=60
-
-initramfs initramfs-linux.img followkernel
-
-# Uncomment to enable bluetooth
-#dtparam=krnbt=on
-
-[pi4]
-# Run as fast as firmware / board allows
-arm_boost=1
-```
+`$ sudo usermod -aG video alarm`
 
 After rebooting, I was able to verify that the display driver was loaded by displaying random data to the screen using:
 
@@ -94,7 +75,7 @@ After rebooting, I was able to verify that the display driver was loaded by disp
 
 ## Building and Running
 
-1. `$ git clone git@github.com:ryansuchocki/panpi.git --recurse-submodules`
+1. `$ git clone https://github.com/ryansuchocki/panpi.git --recurse-submodules`
 2. `$ cd panpi`
 3. `$ make`
 4. `$ cp panpi.cfg.template panpi.cfg`
