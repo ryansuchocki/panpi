@@ -18,7 +18,7 @@ sample_rate: 96000
 
 # Set to 'true' to render to an X11 window rather than direct
 # to the framebuffer
-x_window: true
+# x_window: true
 
 # Target framebuffer device (ignored if x_window is true).
 # You may need to change this if you have multiple displays
