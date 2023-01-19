@@ -41,6 +41,7 @@ void spectrogram_init(unsigned width, unsigned height, unsigned left, unsigned t
     sgam_left = left;
     sgam_top = top;
     smoothed_values = (double *)malloc(sizeof(double) * width);
+    memset(smoothed_values, 0, sizeof(double) * width);
 }
 
 void spectrogram_render_bg(fb_buf_t *fb)
