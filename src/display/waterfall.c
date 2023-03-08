@@ -77,12 +77,14 @@ void waterfall_update(const double *dbm_values)
 
 void render_waterfall(fb_buf_t *buf)
 {
-    for (int x = 0; x < wfall_width; x++)
+    for (int y = 0; y < wfall_height; y++)
     {
-        for (int y = 0; y < wfall_height; y++)
+        colour16_t *waterfall_row = &waterfall[((waterfall_i + y) % wfall_height) * wfall_width];
+
+        for (int x = 0; x < wfall_width; x++)
         {
             *xy(buf, x + wfall_left, wfall_top + wfall_height - 1 - y) =
-                waterfall[((waterfall_i + y + 1) % wfall_height) * wfall_width + x];
+                waterfall_row[x];
         }
     }
 }
