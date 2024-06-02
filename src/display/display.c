@@ -142,7 +142,7 @@ void render_debug_line(void)
         t_last = t_now;
     }
 
-    render_text(fb->buf, debug_line, -7, -10, false, YELLOW);
+    render_text(fb->buf, debug_line, -7, -10, false, false, YELLOW);
 }
 
 void display_update(const double *dbm_values)

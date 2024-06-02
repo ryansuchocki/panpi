@@ -70,7 +70,7 @@ void spectrogram_render_bg(fb_buf_t *fb)
         char buf[13];
         snprintf(buf, 13, "%i", db_val);
 
-        render_text(fb, buf, sgam_left + 6, sgam_top + sgam_height - 1 - y, true, YELLOW);
+        render_text(fb, buf, sgam_left + 6, sgam_top + sgam_height - 1 - y, true, false, YELLOW);
     }
 }
 
