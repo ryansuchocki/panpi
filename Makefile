@@ -15,7 +15,7 @@ override CFLAGS += -isystem third_party -I src -std=gnu2x \
 	-Wdouble-promotion -Wfloat-conversion -Wfloat-equal #\
 	# -fanalyzer
 
-override LDFLAGS += -lm -lasound -lfftw3
+override LDLIBS += -lm -lasound -lfftw3
 
 SOURCES := $(wildcard src/*.c src/*/*.c)
 
@@ -34,7 +34,7 @@ endif
 
 panpi: $(SOURCES)
 	$(info $(COMPILE_X11))
-	gcc $(CFLAGS) $(LDFLAGS) -o panpi $^
+	gcc $(CFLAGS) $(LDFLAGS) -o panpi $^ $(LDLIBS)
 
 clean:
 	rm -f panpi
