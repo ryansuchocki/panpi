@@ -17,7 +17,7 @@
  * API
  ******************************************************************************/
 
-unsigned display_open(unsigned open_sample_rate);
+int display_open(int open_sample_rate);
 void display_close(void);
-void display_configure(unsigned configure_sample_rate);
+void display_configure(int configure_sample_rate);
 void display_update(const double *dbm_values);

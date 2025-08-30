@@ -15,9 +15,9 @@
 
 typedef struct
 {
-    int (*open)(unsigned sample_rate);
+    int (*open)(int sample_rate);
     int (*close)(void);
-    int (*get)(complex double *buffer, unsigned n);
+    int (*get)(complex double *buffer, int n);
 } capture_t;
 
 /*******************************************************************************

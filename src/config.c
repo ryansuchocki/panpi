@@ -64,17 +64,17 @@ struct
     {"device", STR, .STR = config.device, .STRLEN = sizeof(config.device)},
     {"file", STR, .STR = config.file, .STRLEN = sizeof(config.file)},
     {"fb_dev", STR, .STR = config.fb_dev, .STRLEN = sizeof(config.fb_dev)},
-    {"sample_rate", UINT, .UINT = &config.sample_rate},
+    {"sample_rate", INT, .INT = &config.sample_rate},
     {"capture_gain", DOUBLE, .DOUBLE = &config.capture_gain},
     {"dc_alpha", DOUBLE, .DOUBLE = &config.dc_alpha},
     {"x_window", BOOL, .BOOL = &config.x_window},
     {"dbm_cal", DOUBLE, .DOUBLE = &config.dbm_cal},
     {"refl", DOUBLE, .DOUBLE = &config.refl},
     {"refh", DOUBLE, .DOUBLE = &config.refh},
-    {"ref_interval", UINT, .UINT = &config.ref_interval},
-    {"sgam_spread", UINT, .UINT = &config.sgam_spread},
+    {"ref_interval", INT, .INT = &config.ref_interval},
+    {"sgam_spread", INT, .INT = &config.sgam_spread},
     {"sgam_drag", DOUBLE, .DOUBLE = &config.sgam_drag},
-    {"wfall_zoom", UINT, .UINT = &config.wfall_zoom},
+    {"wfall_zoom", INT, .INT = &config.wfall_zoom},
 };
 
 /*******************************************************************************
@@ -105,7 +105,7 @@ void parse(void)
 
         if (sscanf(linebuf, " %m[^:\n]: %m[^\n] ", &keybuf, &valbuf) == 2)
         {
-            for (unsigned i = 0; i < ARRAYLEN(map); i++)
+            for (int i = 0; i < ARRAYLEN(map); i++)
             {
                 if (!strcmp(map[i].key, keybuf))
                 {
@@ -156,9 +156,13 @@ void parse(void)
         }
 
         if (keybuf) free(keybuf);
+        keybuf = NULL;
+
         if (valbuf) free(valbuf);
+        valbuf = NULL;
 
         free(linebuf);
+        linebuf = NULL;
     }
 
     fclose(f);
@@ -191,7 +195,7 @@ bool config_update(void)
     struct inotify_event ev = {0};
     ssize_t length = read(fd, &ev, sizeof(ev));
     ev.len = 0;
-    if (length)
+    if (length > 0)
     {
         if (ev.mask & IN_CLOSE_WRITE)
         {

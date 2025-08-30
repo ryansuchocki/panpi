@@ -69,7 +69,7 @@ static void fb_raw_open(void)
     }
     // TODO verify colour format?
 
-    fb_raw.buf = fb_buf_create(vinfo.xres, vinfo.yres);
+    fb_raw.buf = fb_buf_create((int)vinfo.xres, (int)vinfo.yres);
 
     frontbuf = mmap(0, fb_raw.buf->buf_size, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
     if (frontbuf == MAP_FAILED)
@@ -82,11 +82,14 @@ static void fb_raw_open(void)
 static void fb_raw_close(void)
 {
     munmap(frontbuf, fb_raw.buf->buf_size);
+
     close(fbfd);
+
     free(fb_raw.buf);
+    fb_raw.buf = NULL;
 }
 
 static void fb_raw_draw(void)
 {
-    memcpy(frontbuf, fb_raw.buf->buf, fb_raw.buf->buf_size);
+    memcpy(frontbuf, fb_raw.buf->buf, (size_t)fb_raw.buf->buf_size);
 }

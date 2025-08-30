@@ -20,17 +20,17 @@ typedef struct
     char device[CONFIG_STR_LEN];
     char file[CONFIG_STR_LEN];
     char fb_dev[CONFIG_STR_LEN];
-    unsigned sample_rate;
+    int sample_rate;
     double capture_gain;
     double dc_alpha;
     bool x_window;
     double dbm_cal;
     double refl;
     double refh;
-    unsigned ref_interval;
-    unsigned sgam_spread;
+    int ref_interval;
+    int sgam_spread;
     double sgam_drag;
-    unsigned wfall_zoom;
+    int wfall_zoom;
 } CONFIG_T;
 
 /*******************************************************************************

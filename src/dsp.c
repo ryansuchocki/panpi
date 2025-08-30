@@ -27,36 +27,40 @@ static complex double *fft_in, *fft_out;
 static fftw_plan fft_plan;
 
 static complex double dc = 0;
-static unsigned fft_size = 0;
+static int fft_size = 0;
 static double normalisation_db = 0;
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-void dsp_init(unsigned init_fft_size, unsigned input_scale)
+void dsp_init(int init_fft_size, int input_scale)
 {
     fft_size = init_fft_size;
-    normalisation_db = 20 * log10(input_scale * fft_size);
+    normalisation_db = 20 * log10((double)input_scale * fft_size);
 
-    fft_in = fftw_alloc_complex(fft_size);
-    fft_out = fftw_alloc_complex(fft_size);
+    fft_in = fftw_alloc_complex((size_t)fft_size);
+    fft_out = fftw_alloc_complex((size_t)fft_size);
 
     fft_plan =
-        fftw_plan_dft_1d((int)fft_size, fft_in, fft_out, FFTW_FORWARD, FFTW_MEASURE);
+        fftw_plan_dft_1d(fft_size, fft_in, fft_out, FFTW_FORWARD, FFTW_MEASURE);
 }
 
 void dsp_free(void)
 {
     fftw_destroy_plan(fft_plan);
+
     fftw_free(fft_in);
+    fft_in = NULL;
+
     fftw_free(fft_out);
+    fft_out = NULL;
 }
 
 void dsp_process(const complex double *iq_inputs, double *dbm_results)
 {
     // Prepare the samples for processing by FFTW:
-    for (unsigned i = 0; i < fft_size; i++)
+    for (int i = 0; i < fft_size; i++)
     {
         complex double sample = iq_inputs[i];
 
@@ -73,10 +77,10 @@ void dsp_process(const complex double *iq_inputs, double *dbm_results)
     fftw_execute(fft_plan);
 
     // Prepare the FFT results for processing by the rest of panpi:
-    for (unsigned i = 0; i < fft_size; i++)
+    for (int i = 0; i < fft_size; i++)
     {
         // Use an offset index so that 0Hz is shifted to the centre of the array:
-        unsigned idx = ((fft_size / 2) + i) % fft_size;
+        int idx = ((fft_size / 2) + i) % fft_size;
 
         // Calculate the magnitude squared of the complex frequency bin
         // There's no point performing an expensive square root as it's

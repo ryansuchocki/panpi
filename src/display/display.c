@@ -32,16 +32,16 @@ static void render_debug_line(void);
 static fb_t *fb;
 static fb_buf_t *bg;
 
-static unsigned sgam_height;
-static unsigned sgam_top;
+static int sgam_height;
+static int sgam_top;
 
-static unsigned sample_rate;
+static int sample_rate;
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-unsigned display_open(unsigned open_sample_rate)
+int display_open(int open_sample_rate)
 {
     fb = fb_init(config.x_window);
 
@@ -53,13 +53,13 @@ unsigned display_open(unsigned open_sample_rate)
     bg->size_y = fb->buf->size_y;
     bg->buf_size = fb->buf->buf_size;
 
-    unsigned sgam_width = (fb->buf->size_x - MARGIN * 2 - FRAMETHICKNESS * 2);
+    int sgam_width = (fb->buf->size_x - MARGIN * 2 - FRAMETHICKNESS * 2);
     sgam_height = (fb->buf->size_y - MARGIN * 2 - FRAMETHICKNESS * 2) / 2;
-    unsigned sgam_left = MARGIN + FRAMETHICKNESS;
+    int sgam_left = MARGIN + FRAMETHICKNESS;
     sgam_top = MARGIN + FRAMETHICKNESS;
 
-    unsigned wfall_top = sgam_top + ((fb->buf->size_y - MARGIN * 2 - FRAMETHICKNESS * 2) / 2) + FRAMETHICKNESS;
-    unsigned wfall_height = fb->buf->size_y - wfall_top - MARGIN - FRAMETHICKNESS;
+    int wfall_top = sgam_top + ((fb->buf->size_y - MARGIN * 2 - FRAMETHICKNESS * 2) / 2) + FRAMETHICKNESS;
+    int wfall_height = fb->buf->size_y - wfall_top - MARGIN - FRAMETHICKNESS;
 
     spectrogram_init(sgam_width, sgam_height, sgam_left, sgam_top);
     waterfall_init(sgam_width, wfall_height, sgam_left, wfall_top);
@@ -75,21 +75,21 @@ void display_close(void)
     fb->close();
 }
 
-void display_configure(unsigned configure_sample_rate)
+void display_configure(int configure_sample_rate)
 {
     sample_rate = configure_sample_rate;
 
     // Background
-    for (unsigned x = 0; x < fb->buf->size_x; x++)
-        for (unsigned y = 0; y < fb->buf->size_y; y++)
+    for (int x = 0; x < fb->buf->size_x; x++)
+        for (int y = 0; y < fb->buf->size_y; y++)
             *xy(bg, y, x) = BGCOL;
 
     // Pane background(s)
     spectrogram_render_bg(bg);
 
     // Horizontal lines
-    for (unsigned x = MARGIN; x < fb->buf->size_x - MARGIN; x++)
-        for (unsigned y = 0; y < FRAMETHICKNESS; y++)
+    for (int x = MARGIN; x < fb->buf->size_x - MARGIN; x++)
+        for (int y = 0; y < FRAMETHICKNESS; y++)
         {
             // Head
             *xy(bg, MARGIN + y,x) = WHITE;
@@ -100,8 +100,8 @@ void display_configure(unsigned configure_sample_rate)
         }
 
     // Vertical lines
-    for (unsigned y = MARGIN; y < fb->buf->size_y - 4; y++)
-        for (unsigned x = 0; x < FRAMETHICKNESS; x++)
+    for (int y = MARGIN; y < fb->buf->size_y - 4; y++)
+        for (int x = 0; x < FRAMETHICKNESS; x++)
         {
             // Left
             *xy(bg, y, MARGIN + x) = WHITE;
@@ -110,10 +110,10 @@ void display_configure(unsigned configure_sample_rate)
         }
 
     // Head & foot bottom frequency pips
-    for (unsigned x = 0; x < fb->buf->size_x / 2;
+    for (int x = 0; x < fb->buf->size_x / 2;
          x += (PIP_INTERVAL_HZ * fb->buf->size_x / sample_rate))
-        for (unsigned xx = x; xx <= x + 1; xx++)
-            for (unsigned y = 0; y < MARGIN; y++)
+        for (int xx = x; xx <= x + 1; xx++)
+            for (int y = 0; y < MARGIN; y++)
             {
                 // Head left
                 *xy(bg, y, fb->buf->size_x / 2 - xx) = WHITE;
@@ -137,7 +137,7 @@ void render_debug_line(void)
 
     if (t_now > t_last)
     {
-        snprintf(debug_line, 100, "%ifps %ukHz", count, sample_rate / 1000);
+        snprintf(debug_line, 100, "%ifps %dkHz", count, sample_rate / 1000);
         count = 0;
         t_last = t_now;
     }

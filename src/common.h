@@ -26,7 +26,7 @@
 
 #define STRINGIZE(x) #x
 
-#define ARRAYLEN(x) (sizeof(x) / sizeof(x[0]))
+#define ARRAYLEN(x) ((int)(sizeof(x) / sizeof(x[0])))
 
 #define SQUARED(x) ((x) * (x))
 
@@ -37,7 +37,7 @@
 
 #define UNUSED(x) (void)(x)
 
-#define NANOSECONDS_PER_SECOND (1000000000L)
+#define NANOSECONDS_PER_SECOND (1000000000LL)
 
 #define eprintf(args...) fprintf(stderr, "ERROR: " args)
 

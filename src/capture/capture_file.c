@@ -17,9 +17,9 @@
  * Prototypes
  ******************************************************************************/
 
-static int capture_file_open(unsigned sample_rate);
+static int capture_file_open(int sample_rate);
 static int capture_file_close(void);
-static int capture_file_get(complex double *buffer, unsigned n);
+static int capture_file_get(complex double *buffer, int n);
 static inline uint8_t getc_wrapped(FILE *fp);
 
 /*******************************************************************************
@@ -27,7 +27,7 @@ static inline uint8_t getc_wrapped(FILE *fp);
  ******************************************************************************/
 
 static FILE *capture_fp;
-static unsigned capture_rate;
+static int capture_rate;
 static int64_t capture_time;
 
 capture_t capture_file = {
@@ -40,7 +40,7 @@ capture_t capture_file = {
  * Code
  ******************************************************************************/
 
-static int capture_file_open(unsigned sample_rate)
+static int capture_file_open(int sample_rate)
 {
     if (!strlen(config.file))
     {
@@ -65,7 +65,7 @@ static int capture_file_close(void)
     return 0;
 }
 
-static int capture_file_get(complex double *buffer, unsigned n)
+static int capture_file_get(complex double *buffer, int n)
 {
     // Simulate blocking until the requested number of samples could
     // have been received at the configured sample rate:
@@ -81,15 +81,15 @@ static int capture_file_get(complex double *buffer, unsigned n)
 
     while (n--)
     {
-        int16_t i, q;
+        unsigned i, q;
 
         // Assume file is 16-bit LE, IQ
-        i = getc_wrapped(capture_fp);
-        i |= getc_wrapped(capture_fp) << 8;
-        q = getc_wrapped(capture_fp);
-        q |= getc_wrapped(capture_fp) << 8;
+        i = (unsigned)getc_wrapped(capture_fp);
+        i |= (unsigned)getc_wrapped(capture_fp) << 8;
+        q = (unsigned)getc_wrapped(capture_fp);
+        q |= (unsigned)getc_wrapped(capture_fp) << 8;
 
-        *buffer++ = CMPLX(i, q);
+        *buffer++ = CMPLX((int16_t)i, (int16_t)q);
     }
 
     return 0;

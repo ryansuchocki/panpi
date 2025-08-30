@@ -73,9 +73,12 @@ static void fb_x_open(void)
             .background_pixel = BlackPixel(display, DefaultScreen(display))}));
 
     const char *s = "PanPI " VERSION;
-    XTextProperty prop;
-    XStringListToTextProperty((char **)&s, 1, &prop);
-    XSetWMProperties(display, window, &prop, &prop, NULL, 0, NULL, NULL, NULL);
+    {
+        XTextProperty prop;
+        XStringListToTextProperty((char **)&s, 1, &prop);
+        XSetWMProperties(display, window, &prop, &prop, NULL, 0, NULL, NULL, NULL);
+        XFree(prop.value);
+    }
 
     wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(display, window, &wm_delete_window, 1);
@@ -97,13 +100,30 @@ static void fb_x_open(void)
 
 static void fb_x_close(void)
 {
+    if (img) {
+        img->f.destroy_image(img);  // frees malloc'd pixel data too
+        img = NULL;
+    }
+
+    if (window) {
+        XDestroyWindow(display, window);
+        window = 0;
+    }
+
+    if (display) {
+        XCloseDisplay(display);
+        display = NULL;
+    }
+
+    free(fb_x.buf);
+    fb_x.buf = NULL; // TODO do this elsewhere too?
 }
 
 static void fb_x_draw(void)
 {
-    for (unsigned y = 0; y < FB_HEIGHT; y++)
-        for (unsigned x = 0; x < FB_WIDTH; x++)
-            XPutPixel(img, (int)x, (int)y, colour16_to_24(*xy(fb_x.buf, y, x)));
+    for (int y = 0; y < FB_HEIGHT; y++)
+        for (int x = 0; x < FB_WIDTH; x++)
+            XPutPixel(img, x, y, colour16_to_24(*xy(fb_x.buf, y, x)));
 
     XPutImage(display, window, DefaultGC(display, DefaultScreen(display)), img, 0, 0, 0, 0, FB_WIDTH, FB_HEIGHT);
 

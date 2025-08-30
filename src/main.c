@@ -25,7 +25,7 @@
 
 static volatile bool should_run = true;
 
-unsigned sample_rate = 0;
+int sample_rate = 0;
 
 /*******************************************************************************
  * Code
@@ -50,11 +50,11 @@ int main(int argc, const char *argv[])
     config_init();
     sample_rate = config.sample_rate;
 
-    unsigned sgam_width = display_open(sample_rate);
-    unsigned fft_size = sgam_width;
+    int sgam_width = display_open(sample_rate);
+    int fft_size = sgam_width;
 
-    complex double *iq_samples = malloc(sizeof(complex double) * fft_size);
-    double *dbm_values = malloc(sizeof(double) * fft_size);
+    complex double *iq_samples = malloc(sizeof(complex double) * (size_t)fft_size);
+    double *dbm_values = malloc(sizeof(double) * (size_t)fft_size);
 
     dsp_init(fft_size, INT16_MAX);
 
@@ -83,7 +83,10 @@ int main(int argc, const char *argv[])
     display_close();
 
     free(iq_samples);
+    iq_samples = NULL;
+
     free(dbm_values);
+    dbm_values = NULL;
 
     dsp_free();
 

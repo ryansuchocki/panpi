@@ -26,9 +26,9 @@
  ******************************************************************************/
 
 static const char *get_audio_device(void);
-static int capture_soundcard_open(unsigned sample_rate);
+static int capture_soundcard_open(int sample_rate);
 static int capture_soundcard_close(void);
-static int capture_soundcard_get(complex double *buffer, unsigned n);
+static int capture_soundcard_get(complex double *buffer, int n);
 
 /*******************************************************************************
  * Variables
@@ -90,7 +90,7 @@ static const char *get_audio_device(void)
     return result;
 }
 
-static int capture_soundcard_open(unsigned sample_rate)
+static int capture_soundcard_open(int sample_rate)
 {
     int err;
 
@@ -126,7 +126,7 @@ static int capture_soundcard_open(unsigned sample_rate)
         exit(1);
     }
 
-    if ((err = snd_pcm_hw_params_set_rate(capture_handle, hw_params, sample_rate, 0)) < 0)
+    if ((err = snd_pcm_hw_params_set_rate(capture_handle, hw_params, (unsigned)sample_rate, 0)) < 0)
     {
         eprintf("Cannot set sample rate (%s)\n", snd_strerror(err));
         exit(1);
@@ -166,17 +166,17 @@ static int capture_soundcard_close(void)
     return 0;
 }
 
-static int capture_soundcard_get(complex double *buffer, unsigned n)
+static int capture_soundcard_get(complex double *buffer, int n)
 {
-    int err = 0;
+    snd_pcm_sframes_t result = 0;
 
     int16_t interleaved[n * 2];
 
-    if ((err = (int)snd_pcm_readi(capture_handle, interleaved, n)) != (int)n)
+    if ((result = snd_pcm_readi(capture_handle, interleaved, (unsigned)n)) != n)
     {
-        eprintf("Snd_pcm_readi(): %i (%s)\n", err, snd_strerror(err));
+        eprintf("Snd_pcm_readi(): %li (%s)\n", result, snd_strerror((int)result));
 
-        if (err == -19)
+        if (result == -19)
         {
             exit(-19);
         }
@@ -184,11 +184,11 @@ static int capture_soundcard_get(complex double *buffer, unsigned n)
     }
 
     // Convert interleaved integer samples to complex float:
-    for (unsigned i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
         complex double sample = CMPLX(interleaved[2 * i], interleaved[2 * i + 1]);
         buffer[i] = sample;
     }
 
-    return err;
+    return (int)result;
 }
