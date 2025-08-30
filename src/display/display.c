@@ -133,7 +133,7 @@ void render_debug_line(void)
     static char debug_line[100];
 
     count++;
-    time_t t_now = time(NULL);
+    time_t t_now = get_secs();
 
     if (t_now > t_last)
     {

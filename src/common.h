@@ -45,6 +45,13 @@
  * API
  ******************************************************************************/
 
+static inline time_t get_secs(void)
+{
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t);
+    return t.tv_sec;
+}
+
 static inline int64_t get_nanos(void)
 {
     // NB: will roll over after ~250 years...
