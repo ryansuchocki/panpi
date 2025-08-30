@@ -12,8 +12,7 @@ override CFLAGS += -isystem third_party -I src -std=gnu2x \
 	-Wnull-dereference -Wvector-operation-performance -Wformat-signedness \
 	-Wwrite-strings -Wlogical-op -Wjump-misses-init -Wcast-align \
 	-Wconversion -Wsign-conversion \
-	-Wdouble-promotion -Wfloat-conversion -Wfloat-equal #\
-	# -fanalyzer
+	-Wdouble-promotion -Wfloat-conversion -Wfloat-equal
 
 override LDLIBS += -lm -lasound -lfftw3
 
@@ -23,6 +22,14 @@ ifdef DEBUG
 	override CFLAGS += -g -Og -pg -Wno-inline
 else
 	override CFLAGS += -O3 -march=native -ffast-math -flto
+endif
+
+ifdef ANALYZE
+	override CFLAGS += -fanalyzer
+endif
+
+ifdef SANITIZE
+	override CFLAGS += -fsanitize=undefined -fsanitize=address
 endif
 
 ifeq ($(COMPILE_X11), true)
