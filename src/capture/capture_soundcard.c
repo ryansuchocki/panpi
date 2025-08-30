@@ -27,6 +27,7 @@
 
 static const char *get_audio_device(void);
 static int capture_soundcard_open(int sample_rate);
+static int capture_soundcard_configure(void);
 static int capture_soundcard_close(void);
 static int capture_soundcard_get(complex double *buffer, int n);
 
@@ -38,9 +39,12 @@ static snd_pcm_t *capture_handle;
 
 capture_t capture_soundcard = {
     .open = &capture_soundcard_open,
+    .configure = &capture_soundcard_configure,
     .close = &capture_soundcard_close,
     .get = &capture_soundcard_get,
 };
+
+static double gain = 1;
 
 /*******************************************************************************
  * Code
@@ -156,6 +160,15 @@ static int capture_soundcard_open(int sample_rate)
         exit(1);
     }
 
+    capture_soundcard_configure();
+
+    return 0;
+}
+
+static int capture_soundcard_configure(void)
+{
+    gain = pow(10, config.input_gain / 20);
+
     return 0;
 }
 
@@ -186,7 +199,12 @@ static int capture_soundcard_get(complex double *buffer, int n)
     // Convert interleaved integer samples to complex float:
     for (int i = 0; i < n; i++)
     {
+        // Convert interleaved integer samples to complex float:
         complex double sample = CMPLX(interleaved[2 * i], interleaved[2 * i + 1]);
+
+        // Apply any configured input gain:
+        sample *= gain;
+
         buffer[i] = sample;
     }
 

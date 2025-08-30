@@ -64,9 +64,6 @@ void dsp_process(const complex double *iq_inputs, double *dbm_results)
     {
         complex double sample = iq_inputs[i];
 
-        // Apply any configured input gain:
-        sample *= config.capture_gain;
-
         // Calculate DC offset using a trivial IIR filter:
         dc = (dc * config.dc_alpha) + (sample * (1 - config.dc_alpha));
 

@@ -18,6 +18,7 @@
  ******************************************************************************/
 
 static int capture_file_open(int sample_rate);
+static int capture_file_configure(void);
 static int capture_file_close(void);
 static int capture_file_get(complex double *buffer, int n);
 static inline uint8_t getc_wrapped(FILE *fp);
@@ -32,9 +33,12 @@ static int64_t capture_time;
 
 capture_t capture_file = {
     .open = &capture_file_open,
+    .configure = &capture_file_configure,
     .close = &capture_file_close,
     .get = &capture_file_get,
 };
+
+static double gain = 1;
 
 /*******************************************************************************
  * Code
@@ -55,6 +59,15 @@ static int capture_file_open(int sample_rate)
     }
     capture_rate = sample_rate;
     capture_time = get_nanos();
+
+    capture_file_configure();
+
+    return 0;
+}
+
+static int capture_file_configure(void)
+{
+    gain = pow(10, config.input_gain / 20);
 
     return 0;
 }
@@ -89,7 +102,12 @@ static int capture_file_get(complex double *buffer, int n)
         q = (unsigned)getc_wrapped(capture_fp);
         q |= (unsigned)getc_wrapped(capture_fp) << 8;
 
-        *buffer++ = CMPLX((int16_t)i, (int16_t)q);
+        complex double sample = CMPLX((int16_t)i, (int16_t)q);
+
+        // Apply any configured input gain:
+        sample *= gain;
+
+        *buffer++ = sample;
     }
 
     return 0;

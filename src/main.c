@@ -72,6 +72,7 @@ int main(int argc, const char *argv[])
 
         if (config_update())
         {
+            if (capture.configure) capture.configure();
             display_configure(sample_rate);
             printf("BG\n");
         }
