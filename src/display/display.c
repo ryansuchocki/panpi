@@ -143,6 +143,15 @@ void render_debug_line(void)
     }
 
     render_text(fb->buf, debug_line, -7, -10, false, false, YELLOW);
+
+    static char left_line[100];
+
+    time_t rawtime;
+    time(&rawtime);
+    struct tm *timeinfo = localtime(&rawtime);
+    strftime(left_line, 100, "%a %b %d  %H %M %S", timeinfo);
+
+    render_text(fb->buf, left_line, 10, -10, false, false, YELLOW);
 }
 
 void display_update(const double *dbm_values)
