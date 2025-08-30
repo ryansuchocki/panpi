@@ -82,7 +82,7 @@ static inline fb_buf_t *fb_buf_create(int size_x, int size_y)
     return buf;
 }
 
-static inline colour16_t *xy(fb_buf_t *buf, int y, int x)
+static inline colour16_t *xy(fb_buf_t *buf, int x, int y)
 {
     // TODO assert?
     return &buf->buf[y * buf->size_x + x];

@@ -81,7 +81,7 @@ void render_waterfall(fb_buf_t *buf)
     {
         for (int y = 0; y < wfall_height; y++)
         {
-            *xy(buf, wfall_top + wfall_height - 1 - y, x + wfall_left) =
+            *xy(buf, x + wfall_left, wfall_top + wfall_height - 1 - y) =
                 waterfall[((waterfall_i + y + 1) % wfall_height) * wfall_width + x];
         }
     }

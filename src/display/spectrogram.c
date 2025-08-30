@@ -51,7 +51,7 @@ void spectrogram_render_bg(fb_buf_t *fb)
     {
         for (int y = 0; y < sgam_height; y++)
         {
-            *xy(fb, sgam_top + sgam_height - 1 - y, sgam_left + x) =
+            *xy(fb, sgam_left + x, sgam_top + sgam_height - 1 - y) =
                 (x == sgam_width / 2) ? CLINECOL : BGCOL;
         }
     }
@@ -65,7 +65,7 @@ void spectrogram_render_bg(fb_buf_t *fb)
         int y = (int)((db_val - config.refl) * sgam_height / (config.refh - config.refl));
         for (int x = 8 + 8 + 8 + 1; (x + 3) < sgam_width; x += 8)
             for (int xx = x; xx < x + 3; xx++)
-                *xy(fb, (sgam_top + sgam_height - 1) - y, sgam_left + xx) = HLINECOL;
+                *xy(fb, sgam_left + xx, (sgam_top + sgam_height - 1) - y) = HLINECOL;
 
         char buf[13];
         snprintf(buf, 13, "%i", db_val);
@@ -122,7 +122,7 @@ void render_spectrogram(fb_buf_t *buf)
 
         for (int y = start; y <= stop; y++)
         {
-            *xy(buf, sgam_top + sgam_height - y - 1, col) = YELLOW;
+            *xy(buf, col, sgam_top + sgam_height - y - 1) = YELLOW;
         }
     }
 }

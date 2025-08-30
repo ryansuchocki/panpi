@@ -82,7 +82,7 @@ void display_configure(int configure_sample_rate)
     // Background
     for (int x = 0; x < fb->buf->size_x; x++)
         for (int y = 0; y < fb->buf->size_y; y++)
-            *xy(bg, y, x) = BGCOL;
+            *xy(bg, x, y) = BGCOL;
 
     // Pane background(s)
     spectrogram_render_bg(bg);
@@ -92,11 +92,11 @@ void display_configure(int configure_sample_rate)
         for (int y = 0; y < FRAMETHICKNESS; y++)
         {
             // Head
-            *xy(bg, MARGIN + y,x) = WHITE;
+            *xy(bg, x, MARGIN + y) = WHITE;
             // Mid
-            *xy(bg, sgam_top + sgam_height + y, x) = WHITE;
+            *xy(bg, x, sgam_top + sgam_height + y) = WHITE;
             // Foot
-            *xy(bg, fb->buf->size_y - 4 - y, x) = WHITE;
+            *xy(bg, x, fb->buf->size_y - 4 - y) = WHITE;
         }
 
     // Vertical lines
@@ -104,9 +104,9 @@ void display_configure(int configure_sample_rate)
         for (int x = 0; x < FRAMETHICKNESS; x++)
         {
             // Left
-            *xy(bg, y, MARGIN + x) = WHITE;
+            *xy(bg, MARGIN + x, y) = WHITE;
             // Right
-            *xy(bg, y, fb->buf->size_x - 4 - x) = WHITE;
+            *xy(bg, fb->buf->size_x - 4 - x, y) = WHITE;
         }
 
     // Head & foot bottom frequency pips
@@ -116,13 +116,13 @@ void display_configure(int configure_sample_rate)
             for (int y = 0; y < MARGIN; y++)
             {
                 // Head left
-                *xy(bg, y, fb->buf->size_x / 2 - xx) = WHITE;
+                *xy(bg, fb->buf->size_x / 2 - xx, y) = WHITE;
                 // Head right
-                *xy(bg, y, fb->buf->size_x / 2 + xx) = WHITE;
+                *xy(bg, fb->buf->size_x / 2 + xx, y) = WHITE;
                 // Foot left
-                *xy(bg, fb->buf->size_y - y - 1, fb->buf->size_x / 2 - xx) = WHITE;
+                *xy(bg, fb->buf->size_x / 2 - xx, fb->buf->size_y - y - 1) = WHITE;
                 // Foot right
-                *xy(bg, fb->buf->size_y - y - 1, fb->buf->size_x / 2 + xx) = WHITE;
+                *xy(bg, fb->buf->size_x / 2 + xx, fb->buf->size_y - y - 1) = WHITE;
             }
 }
 

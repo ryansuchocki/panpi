@@ -123,7 +123,7 @@ static void fb_x_draw(void)
 {
     for (int y = 0; y < FB_HEIGHT; y++)
         for (int x = 0; x < FB_WIDTH; x++)
-            XPutPixel(img, x, y, colour16_to_24(*xy(fb_x.buf, y, x)));
+            XPutPixel(img, x, y, colour16_to_24(*xy(fb_x.buf, x, y)));
 
     XPutImage(display, window, DefaultGC(display, DefaultScreen(display)), img, 0, 0, 0, 0, FB_WIDTH, FB_HEIGHT);
 
